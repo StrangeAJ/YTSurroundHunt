@@ -1,3 +1,4 @@
+PORT = 10000
 from flask import Flask, request, render_template
 import yt_dlp
 
