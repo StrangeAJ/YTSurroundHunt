@@ -1,8 +1,10 @@
 PORT = 10000
 from flask import Flask, request, render_template
+from flask_cors import CORS
 import yt_dlp
 
 app = Flask(__name__)
+CORS(app)
 
 surround_formats = ['256', '258', '325', '327', '328', '338', '380']
 
