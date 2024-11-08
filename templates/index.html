@@ -4,134 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Search</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            color: #333;
-            text-align: center;
-            padding: 20px;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        h1 {
-            color: #d8ff3d;
-        }
-        form {
-            margin-bottom: 20px;
-        }
-        input[type="text"] {
-            padding: 10px;
-            width: 300px;
-            border: 2px solid #d8ff3d;
-            border-radius: 5px;
-            margin-right: 10px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #d8ff3d;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #fff23d;
-        }
-        .youtube-logo {
-            width: 24px;
-            height: 24px;
-            vertical-align: middle;
-        }
-        .progress-bar {
-            width: 100%;
-            background-color: #ff773d;
-            border-radius: 5px;
-            overflow: hidden;
-            margin-top: 20px;
-            display: none;
-        }
-        .progress-bar-inner {
-            height: 20px;
-            width: 0;
-            background-color: #d8ff3d;
-            transition: width 0.3s ease-in-out;
-        }
-        .dark-theme {
-            background-color: #333;
-            color: #f0f0f0;
-        }
-        .dark-theme h1 {
-            color: #d8ff3d;
-        }
-        .dark-theme input[type="text"] {
-            border: 2px solid #d8ff3d;
-        }
-        .dark-theme button {
-            background-color: #d8ff3d;
-            color: #333;
-        }
-        .dark-theme button:hover {
-            background-color: #fff23d;
-        }
-        .dark-theme .progress-bar {
-            background-color: #ff773d;
-        }
-        .dark-theme .progress-bar-inner {
-            background-color: #d8ff3d;
-        }
-        .toggle-theme-button {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-    </style>
-    <script>
-        function showProgressBar() {
-            document.getElementById("progress-bar").style.display = "block";
-        }
-
-        function hideProgressBar() {
-            document.getElementById("progress-bar").style.display = "none";
-        }
-
-        function updateProgress(count) {
-            const progressBar = document.querySelector('.progress-bar-inner');
-            const percentage = (count / 10) * 100;
-            progressBar.style.width = percentage + '%';
-        }
-
-        function getSystemTheme() {
-            return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-        }
-
-        function setTheme(theme) {
-            if (theme === "dark") {
-                document.body.classList.add("dark-theme");
-            } else {
-                document.body.classList.remove("dark-theme");
-            }
-            localStorage.setItem("theme", theme);
-        }
-
-        function toggleTheme() {
-            const currentTheme = localStorage.getItem("theme") || getSystemTheme();
-            const newTheme = currentTheme === "dark" ? "light" : "dark";
-            setTheme(newTheme);
-        }
-
-        window.onload = function () {
-            hideProgressBar();
-            const savedTheme = localStorage.getItem("theme");
-            const theme = savedTheme || getSystemTheme();
-            setTheme(theme);
-            window.matchMedia("(prefers-color-scheme: dark)").addListener((e) => {
-                if (!localStorage.getItem("theme")) {
-                    setTheme(e.matches ? "dark" : "light");
-                }
-            });
-        };
-    </script>
+    <link rel="stylesheet" href="{{ url_for('static',filename='styles.css') }}">
 </head>
 <body>
     <h1>YouTube Search</h1>
@@ -176,5 +49,6 @@
     </table>
     {% endfor %}
     {% endif %}
+    <script src="{{ url_for('static',filename='scripts.js') }}"></script>
 </body>
 </html>
