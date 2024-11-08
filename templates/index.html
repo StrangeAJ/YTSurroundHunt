@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #d8ff3d;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 300px;
+            border: 2px solid #d8ff3d;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #d8ff3d;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #fff23d;
+        }
+        .youtube-logo {
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #ff773d;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 20px;
+            display: none;
+        }
+        .progress-bar-inner {
+            height: 20px;
+            width: 0;
+            background-color: #d8ff3d;
+            transition: width 0.5s;
+        }
+    </style>
+    <script>
+        function showProgressBar() {
+            document.getElementById('progress-bar').style.display = 'block';
+        }
+
+        function hideProgressBar() {
+            document.getElementById('progress-bar').style.display = 'none';
+        }
+
+        function updateProgressBar(progress) {
+            document.querySelector('.progress-bar-inner').style.width = progress + '%';
+        }
+
+        async function searchYouTube(query) {
+            showProgressBar();
+            const response = await fetch('/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query })
+            });
+            const data = await response.json();
+            hideProgressBar();
+            displayResults(data);
+        }
+
+        function displayResults(data) {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '';
+            data.forEach(item => {
+                updateProgressBar(item.progress);
+                item.results.forEach(result => {
+                    const resultElement = document.createElement('div');
+                    resultElement.innerHTML = `
+                        <h3>
+                            <a href="${result.url}" target="_blank">
+                                <img src="https://www.youtube.com/s/desktop/6b8b1b0d/img/favicon_32x32.png" alt="YouTube" class="youtube-logo">
+                            </a>
+                            ${result.title}
+                        </h3>
+                        <table border="1" style="margin: 0 auto;">
+                            <thead>
+                                <tr>
+                                    <th>Format ID</th>
+                                    <th>Audio Bitrate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${result.audio_qualities.map(quality => `
+                                    <tr>
+                                        <td>${quality[0]}</td>
+                                        <td>${quality[1]}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                    resultsContainer.appendChild(resultElement);
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('form');
+            form.addEventListener('submit', event => {
+                event.preventDefault();
+                const query = form.querySelector('input[name="query"]').value;
+                searchYouTube(query);
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>YouTube Search</h1>
+    <form method="post">
+        <input type="text" name="query" placeholder="Enter search term" required>
+        <button type="submit">Search</button>
+    </form>
+    <div id="progress-bar" class="progress-bar">
+        <div class="progress-bar-inner"></div>
+    </div>
+    <div id="results"></div>
+</body>
+</html>
