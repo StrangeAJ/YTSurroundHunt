@@ -11,6 +11,7 @@
             color: #333;
             text-align: center;
             padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
         }
         h1 {
             color: #d8ff3d;
@@ -54,91 +55,126 @@
             height: 20px;
             width: 0;
             background-color: #d8ff3d;
-            transition: width 0.5s;
+            transition: width 0.3s ease-in-out;
+        }
+        .dark-theme {
+            background-color: #333;
+            color: #f0f0f0;
+        }
+        .dark-theme h1 {
+            color: #d8ff3d;
+        }
+        .dark-theme input[type="text"] {
+            border: 2px solid #d8ff3d;
+        }
+        .dark-theme button {
+            background-color: #d8ff3d;
+            color: #333;
+        }
+        .dark-theme button:hover {
+            background-color: #fff23d;
+        }
+        .dark-theme .progress-bar {
+            background-color: #ff773d;
+        }
+        .dark-theme .progress-bar-inner {
+            background-color: #d8ff3d;
+        }
+        .toggle-theme-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
         }
     </style>
     <script>
         function showProgressBar() {
-            document.getElementById('progress-bar').style.display = 'block';
+            document.getElementById("progress-bar").style.display = "block";
         }
 
         function hideProgressBar() {
-            document.getElementById('progress-bar').style.display = 'none';
+            document.getElementById("progress-bar").style.display = "none";
         }
 
-        function updateProgressBar(progress) {
-            document.querySelector('.progress-bar-inner').style.width = progress + '%';
+        function updateProgress(count) {
+            const progressBar = document.querySelector('.progress-bar-inner');
+            const percentage = (count / 10) * 100;
+            progressBar.style.width = percentage + '%';
         }
 
-        async function searchYouTube(query) {
-            showProgressBar();
-            const response = await fetch('/search', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ query })
-            });
-            const data = await response.json();
+        function getSystemTheme() {
+            return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+
+        function setTheme(theme) {
+            if (theme === "dark") {
+                document.body.classList.add("dark-theme");
+            } else {
+                document.body.classList.remove("dark-theme");
+            }
+            localStorage.setItem("theme", theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem("theme") || getSystemTheme();
+            const newTheme = currentTheme === "dark" ? "light" : "dark";
+            setTheme(newTheme);
+        }
+
+        window.onload = function () {
             hideProgressBar();
-            displayResults(data);
-        }
-
-        function displayResults(data) {
-            const resultsContainer = document.getElementById('results');
-            resultsContainer.innerHTML = '';
-            data.forEach(item => {
-                updateProgressBar(item.progress);
-                item.results.forEach(result => {
-                    const resultElement = document.createElement('div');
-                    resultElement.innerHTML = `
-                        <h3>
-                            <a href="${result.url}" target="_blank">
-                                <img src="https://www.youtube.com/s/desktop/6b8b1b0d/img/favicon_32x32.png" alt="YouTube" class="youtube-logo">
-                            </a>
-                            ${result.title}
-                        </h3>
-                        <table border="1" style="margin: 0 auto;">
-                            <thead>
-                                <tr>
-                                    <th>Format ID</th>
-                                    <th>Audio Bitrate</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${result.audio_qualities.map(quality => `
-                                    <tr>
-                                        <td>${quality[0]}</td>
-                                        <td>${quality[1]}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    `;
-                    resultsContainer.appendChild(resultElement);
-                });
+            const savedTheme = localStorage.getItem("theme");
+            const theme = savedTheme || getSystemTheme();
+            setTheme(theme);
+            window.matchMedia("(prefers-color-scheme: dark)").addListener((e) => {
+                if (!localStorage.getItem("theme")) {
+                    setTheme(e.matches ? "dark" : "light");
+                }
             });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.querySelector('form');
-            form.addEventListener('submit', event => {
-                event.preventDefault();
-                const query = form.querySelector('input[name="query"]').value;
-                searchYouTube(query);
-            });
-        });
+        };
     </script>
 </head>
 <body>
     <h1>YouTube Search</h1>
-    <form method="post">
-        <input type="text" name="query" placeholder="Enter search term" required>
+    <button class="toggle-theme-button" onclick="toggleTheme()">Toggle Dark Theme</button>
+    <form method="post" onsubmit="showProgressBar()">
+        <input type="text" name="query" placeholder="Enter search term" required />
         <button type="submit">Search</button>
     </form>
     <div id="progress-bar" class="progress-bar">
         <div class="progress-bar-inner"></div>
     </div>
-    <div id="results"></div>
+    {% if results %}
+    <script>
+        updateProgress({{ results|length }});
+        setTimeout(() => {
+            hideProgressBar();
+        }, 500);
+    </script>
+    <h2>Search Results</h2>
+    {% for result in results %}
+    <h3>
+        <a href="{{ result.url }}" target="_blank">
+            <img src="https://www.youtube.com/s/desktop/6b8b1b0d/img/favicon_32x32.png" alt="YouTube" class="youtube-logo" />
+        </a>
+        {{ result.title }}
+    </h3>
+    <table border="1" style="margin: 0 auto">
+        <thead>
+            <tr>
+                <th>Format ID</th>
+                <th>Audio Bitrate</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for quality in result.audio_qualities %}
+            <tr>
+                <td>{{ quality[0] }}</td>
+                <td>{{ quality[1] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
+    {% endif %}
 </body>
 </html>

@@ -3,6 +3,8 @@ import yt_dlp
 
 app = Flask(__name__)
 
+surround_formats = ['256', '258', '325', '327', '328', '338', '380']
+
 def search_youtube(query):
     ydl_opts = {
         'default_search': 'ytsearch10',
@@ -16,7 +18,7 @@ def search_youtube(query):
             audio_qualities = []
             for format in entry['formats']:
                 if format['vcodec'] == 'none':  # This format is audio-only
-                    if format['format_id'] in ['256', '258', '325', '327', '328', '338', '380']:
+                    if format['format_id'] in surround_formats:
                         audio_qualities.append([format['format_id'], f"{format['abr']}kbps"])
             if audio_qualities:
                 results.append({
