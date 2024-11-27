@@ -1,9 +1,16 @@
 PORT = 10000
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, flash
 from flask_cors import CORS
+from flask_wtf import FlaskForm
+from wtforms import StringField
+from flask_wtf.recaptcha import RecaptchaField
+from wtforms.validators import DataRequired
 import yt_dlp
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'randomkey'
+app.config['RECAPTCHA_PUBLIC_KEY'] = '6Lf5oosqAAAAAI1bixZHxSkKPcgYFTW7RdMJBNeT'
+app.config['RECAPTCHA_PRIVATE_KEY'] = '6Lf5oosqAAAAADINZb5pI6mAJgOrxdRGjRf7L3Fi'
 CORS(app)
 
 surround_formats = ['256', '258', '325', '327', '328', '338', '380']
@@ -35,13 +42,22 @@ def search_youtube(query):
                 })
         return results
 
+class SearchForm(FlaskForm):
+    query = StringField('Search', validators=[DataRequired()])
+    recaptcha = RecaptchaField()
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    if request.method == 'POST':
-        query = request.form['query']
-        results = search_youtube(query)
-        return render_template('index.html', results=results)
-    return render_template('index.html', results=None)
+    form = SearchForm()
+    if form.validate_on_submit():
+        query = form.query.data
+        try:
+            results = search_youtube(query)
+            return render_template('index.html', results=results, form=form)
+        except Exception as e:
+            flash('An error occurred. Please try again.')
+            return render_template('index.html', results=None, form=form)
+    return render_template('index.html', results=None, form=form)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=10000)

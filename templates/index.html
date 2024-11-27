@@ -1,54 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://www.google.com/recaptcha/api.js"></script>
     <title>YouTube Search</title>
-    <link rel="stylesheet" href="{{ url_for('static',filename='styles.css') }}">
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static',filename='styles.css') }}"
+    />
+  </head>
+  <body>
     <h1>YouTube Search</h1>
-    <button class="toggle-theme-button" onclick="toggleTheme()">Toggle Dark Theme</button>
+    <button class="toggle-theme-button" onclick="toggleTheme()">
+      Toggle Dark Theme
+    </button>
     <form method="post" onsubmit="showProgressBar()">
-        <input type="text" name="query" placeholder="Enter search term" required />
-        <button type="submit">Search</button>
+      {{ form.hidden_tag() }} {{ form.query(size=32) }} {{ form.recaptcha }}
+      <button
+        type="submit"
+        class="g-recaptcha"
+        data-sitekey="6Lf5oosqAAAAAI1bixZHxSkKPcgYFTW7RdMJBNeT"
+      >
+        Search
+      </button>
     </form>
     <div id="progress-bar" class="progress-bar">
-        <div class="progress-bar-inner"></div>
+      <div class="progress-bar-inner"></div>
     </div>
     {% if results %}
     <script>
-        updateProgress({{ results|length }});
-        setTimeout(() => {
-            hideProgressBar();
-        }, 500);
+      updateProgress({{ results|length }});
+      setTimeout(() => {
+          hideProgressBar();
+      }, 500);
     </script>
     <h2>Search Results</h2>
     {% for result in results %}
     <h3>
-        <a href="{{ result.url }}" target="_blank">
-            <img src="https://www.youtube.com/s/desktop/6b8b1b0d/img/favicon_32x32.png" alt="YouTube" class="youtube-logo" />
-        </a>
-        {{ result.title }}
+      <a href="{{ result.url }}" target="_blank">
+        <img
+          src="https://www.youtube.com/s/desktop/6b8b1b0d/img/favicon_32x32.png"
+          alt="YouTube"
+          class="youtube-logo"
+        />
+      </a>
+      {{ result.title }}
     </h3>
     <table border="1" style="margin: 0 auto">
-        <thead>
-            <tr>
-                <th>Format ID</th>
-                <th>Audio Bitrate</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for quality in result.audio_qualities %}
-            <tr>
-                <td>{{ quality[0] }}</td>
-                <td>{{ quality[1] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
+      <thead>
+        <tr>
+          <th>Format ID</th>
+          <th>Audio Bitrate</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for quality in result.audio_qualities %}
+        <tr>
+          <td>{{ quality[0] }}</td>
+          <td>{{ quality[1] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
-    {% endfor %}
-    {% endif %}
+    {% endfor %} {% endif %}
     <script src="{{ url_for('static',filename='scripts.js') }}"></script>
-</body>
+  </body>
 </html>
