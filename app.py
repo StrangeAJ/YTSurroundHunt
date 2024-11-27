@@ -13,6 +13,10 @@ def search_youtube(query):
         'default_search': 'ytsearch10',
         'quiet': True,
         'no_warnings': True,
+        'http_headers': {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9',
+    },
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         search_results = ydl.extract_info(query, download=False)
