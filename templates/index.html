@@ -16,14 +16,10 @@
       Toggle Dark Theme
     </button>
     <form method="post" onsubmit="showProgressBar()">
-      {{ form.hidden_tag() }} {{ form.query(size=32) }} {{ form.recaptcha }}
-      <button
-        type="submit"
-        class="g-recaptcha"
-        data-sitekey="6Lf5oosqAAAAAI1bixZHxSkKPcgYFTW7RdMJBNeT"
-      >
-        Search
-      </button>
+        {{ form.hidden_tag() }}
+        {{ form.query(size=32) }}
+        {{ form.recaptcha }}
+        <button type="submit">Search</button>
     </form>
     <div id="progress-bar" class="progress-bar">
       <div class="progress-bar-inner"></div>

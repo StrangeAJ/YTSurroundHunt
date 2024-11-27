@@ -55,8 +55,10 @@ def index():
             results = search_youtube(query)
             return render_template('index.html', results=results, form=form)
         except Exception as e:
-            flash('An error occurred. Please try again.')
+            flash('An error occurred during the search.')
             return render_template('index.html', results=None, form=form)
+    elif request.method == 'POST':
+        flash('Please complete the reCAPTCHA.')
     return render_template('index.html', results=None, form=form)
 
 if __name__ == "__main__":
