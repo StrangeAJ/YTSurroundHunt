@@ -11,13 +11,18 @@ h1 {
 }
 form {
     margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
 }
 input[type="text"] {
     padding: 10px;
-    width: 300px;
+    width: min(300px, 100%);
+    max-width: 100%;
+    box-sizing: border-box;
     border: 2px solid #d8ff3d;
     border-radius: 5px;
-    margin-right: 10px;
 }
 button {
     padding: 10px 20px;
@@ -38,10 +43,11 @@ button:hover {
 }
 .progress-bar {
     width: 100%;
+    max-width: 600px;
     background-color: #ff773d;
     border-radius: 5px;
     overflow: hidden;
-    margin-top: 20px;
+    margin: 20px auto 0;
     display: none;
 }
 .progress-bar-inner {
@@ -49,6 +55,29 @@ button:hover {
     width: 0;
     background-color: #d8ff3d;
     transition: width 0.3s ease-in-out;
+}
+.progress-bar.indeterminate .progress-bar-inner {
+    width: 40% !important;
+    animation: indeterminate 1.1s ease-in-out infinite;
+}
+@keyframes indeterminate {
+    from {
+        margin-left: -40%;
+    }
+    to {
+        margin-left: 100%;
+    }
+}
+.table-wrap {
+    overflow-x: auto;
+}
+.result {
+    margin-bottom: 24px;
+}
+.flashes {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 10px;
 }
 .dark-theme {
     background-color: #333;

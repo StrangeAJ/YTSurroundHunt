@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://www.google.com/recaptcha/api.js"></script>
     <title>YouTube Search</title>
     <link
       rel="stylesheet"
@@ -11,64 +10,27 @@
     />
   </head>
   <body>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul class="flashes">
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
     <h1>YouTube Search</h1>
     <button class="toggle-theme-button" onclick="toggleTheme()">
       Toggle Dark Theme
     </button>
-    <form method="post" onsubmit="showProgressBar()">
+    <form id="search-form" method="post">
         {{ form.hidden_tag() }}
         {{ form.query(size=32) }}
-        {{ form.recaptcha }}
         <button type="submit">Search</button>
     </form>
-    <div id="progress-bar" class="progress-bar">
+    <ul id="flashes" class="flashes" aria-live="polite"></ul>
+    <div
+      id="progress-bar"
+      class="progress-bar"
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+    >
       <div class="progress-bar-inner"></div>
     </div>
-    {% if results %}
-    <script>
-      updateProgress({{ results|length }});
-      setTimeout(() => {
-          hideProgressBar();
-      }, 500);
-    </script>
-    <h2>Search Results</h2>
-    {% for result in results %}
-    <h3>
-      <a href="{{ result.url }}" target="_blank">
-        <img
-          src="https://www.youtube.com/s/desktop/6b8b1b0d/img/favicon_32x32.png"
-          alt="YouTube"
-          class="youtube-logo"
-        />
-      </a>
-      {{ result.title }}
-    </h3>
-    <table border="1" style="margin: 0 auto">
-      <thead>
-        <tr>
-          <th>Format ID</th>
-          <th>Audio Bitrate</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for quality in result.audio_qualities %}
-        <tr>
-          <td>{{ quality[0] }}</td>
-          <td>{{ quality[1] }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% endfor %} {% endif %}
+    <div id="results"></div>
     <script src="{{ url_for('static',filename='scripts.js') }}"></script>
   </body>
 </html>

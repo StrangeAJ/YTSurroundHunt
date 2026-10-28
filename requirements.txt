@@ -1,4 +1,6 @@
 flask
+gunicorn
 yt-dlp
+yt-dlp-ejs
 flask-cors
 Flask-WTF

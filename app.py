@@ -1,16 +1,13 @@
 PORT = 10000
-from flask import Flask, request, render_template, flash
+from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 from flask_wtf import FlaskForm
 from wtforms import StringField
-from flask_wtf.recaptcha import RecaptchaField
 from wtforms.validators import DataRequired
 import yt_dlp
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'randomkey'
-app.config['RECAPTCHA_PUBLIC_KEY'] = '6Lf5oosqAAAAAI1bixZHxSkKPcgYFTW7RdMJBNeT'
-app.config['RECAPTCHA_PRIVATE_KEY'] = '6Lf5oosqAAAAADINZb5pI6mAJgOrxdRGjRf7L3Fi'
 CORS(app)
 
 surround_formats = ['256', '258', '325', '327', '328', '338', '380']
@@ -20,6 +17,7 @@ def search_youtube(query):
         'default_search': 'ytsearch10',
         'quiet': True,
         'no_warnings': True,
+        'js_runtimes': {'node': {}, 'deno': {}},
         'http_headers': {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
         'Accept-Language': 'en-US,en;q=0.9',
@@ -28,38 +26,49 @@ def search_youtube(query):
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         search_results = ydl.extract_info(query, download=False)
         results = []
-        for entry in search_results['entries']:
+        for entry in search_results.get('entries') or []:
             audio_qualities = []
-            for format in entry['formats']:
-                if format['vcodec'] == 'none':  # This format is audio-only
-                    if format['format_id'] in surround_formats:
-                        audio_qualities.append([format['format_id'], f"{format['abr']}kbps"])
+            for format in entry.get('formats') or []:
+                if format.get('vcodec') != 'none':  # Skip formats that contain video
+                    continue
+                channels = format.get('audio_channels') or 0
+                if format['format_id'] in surround_formats or channels > 2:
+                    abr = format.get('abr')
+                    audio_qualities.append([
+                        format['format_id'],
+                        f"{round(abr)}kbps" if abr else f"{channels}ch",
+                    ])
             if audio_qualities:
                 results.append({
-                    'title': entry['title'],
-                    'url': entry['webpage_url'],
+                    'title': entry.get('title', 'Unknown title'),
+                    'url': entry.get('webpage_url'),
                     'audio_qualities': audio_qualities
                 })
         return results
 
 class SearchForm(FlaskForm):
     query = StringField('Search', validators=[DataRequired()])
-    recaptcha = RecaptchaField()
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
-    form = SearchForm()
-    if form.validate_on_submit():
-        query = form.query.data
-        try:
-            results = search_youtube(query)
-            return render_template('index.html', results=results, form=form)
-        except Exception as e:
-            flash('An error occurred during the search.')
-            return render_template('index.html', results=None, form=form)
-    elif request.method == 'POST':
-        flash('Please complete the reCAPTCHA.')
-    return render_template('index.html', results=None, form=form)
+    return render_template('index.html', form=SearchForm())
+
+
+@app.route('/search', methods=['POST'])
+def search():
+    query = (request.form.get('query') or '').strip()
+    if not query:
+        return jsonify({'error': 'Please enter a search query.'}), 400
+    try:
+        return jsonify({'results': search_youtube(query)})
+    except Exception:
+        app.logger.exception('Search failed')
+        return jsonify({'error': 'An error occurred during the search.'}), 500
+
+
+@app.route('/healthz')
+def healthz():
+    return jsonify({'status': 'ok'})
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=10000)
