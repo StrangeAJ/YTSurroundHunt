@@ -79,6 +79,36 @@ button:hover {
     padding: 0;
     margin: 0 0 10px;
 }
+.cookies-panel {
+    max-width: 600px;
+    margin: 0 auto 20px;
+    text-align: left;
+}
+.cookies-panel summary {
+    cursor: pointer;
+    text-align: center;
+}
+.cookies-panel .hint {
+    font-size: 13px;
+    opacity: 0.8;
+}
+.cookies-panel input[type="file"] {
+    display: block;
+    width: 100%;
+    margin-bottom: 8px;
+}
+.cookies-panel textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    border: 2px solid #d8ff3d;
+    border-radius: 5px;
+    font-family: monospace;
+    resize: vertical;
+}
+.cookies-panel button {
+    margin-top: 8px;
+}
 .dark-theme {
     background-color: #333;
     color: #f0f0f0;

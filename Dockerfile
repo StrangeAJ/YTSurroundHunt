@@ -1,23 +1,33 @@
-FROM python:3.12-slim
+FROM brainicism/bgutil-ytdlp-pot-provider:2.0.2
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
+USER root
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 python3-venv python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV VIRTUAL_ENV=/opt/venv \
+    PATH="/opt/venv/bin:$PATH" \
+    PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PORT=10000
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates curl gnupg \
-    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
+WORKDIR /srv/app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python3 -m venv "$VIRTUAL_ENV" \
+    && pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
+    && chown -R node:node /srv/app
+
+USER node
+
 EXPOSE 10000
 
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-10000} --workers 1 --threads 4 --timeout 180 app:app"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD []

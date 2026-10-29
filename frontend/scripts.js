@@ -146,9 +146,15 @@ document.addEventListener("DOMContentLoaded", () => {
             showProgressBar();
 
             try {
+                const formData = new FormData(form);
+                const cookies = document.getElementById("cookies").value.trim();
+                if (cookies) {
+                    formData.append("cookies", cookies);
+                }
+
                 const response = await fetch(`${API_BASE_URL}/search`, {
                     method: "POST",
-                    body: new FormData(form),
+                    body: formData,
                 });
                 const payload = await response.json().catch(() => ({}));
                 if (!response.ok) {
@@ -159,6 +165,38 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (error) {
                 hideProgressBar();
                 showMessage(error.message);
+            }
+        });
+    }
+
+    const cookiesInput = document.getElementById("cookies");
+    if (cookiesInput) {
+        cookiesInput.value = sessionStorage.getItem("yt_cookies") || "";
+        cookiesInput.addEventListener("input", () => {
+            sessionStorage.setItem("yt_cookies", cookiesInput.value);
+        });
+    }
+
+    const cookiesFile = document.getElementById("cookies-file");
+    if (cookiesFile && cookiesInput) {
+        cookiesFile.addEventListener("change", async () => {
+            const file = cookiesFile.files[0];
+            if (!file) {
+                return;
+            }
+            const text = await file.text();
+            cookiesInput.value = text;
+            sessionStorage.setItem("yt_cookies", text);
+        });
+    }
+
+    const clearCookies = document.getElementById("clear-cookies");
+    if (clearCookies && cookiesInput) {
+        clearCookies.addEventListener("click", () => {
+            cookiesInput.value = "";
+            sessionStorage.removeItem("yt_cookies");
+            if (cookiesFile) {
+                cookiesFile.value = "";
             }
         });
     }

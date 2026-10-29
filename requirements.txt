@@ -2,5 +2,6 @@ flask
 gunicorn
 yt-dlp
 yt-dlp-ejs
+bgutil-ytdlp-pot-provider==2.0.2
 flask-cors
 Flask-WTF

@@ -15,6 +15,22 @@
       <input type="text" id="query" name="query" size="32" required />
       <button type="submit">Search</button>
     </form>
+    <details class="cookies-panel">
+      <summary>Use your own YouTube cookies (optional)</summary>
+      <p class="hint">
+        Only needed if YouTube blocks the server with a "confirm you're not a
+        bot" error. Use a burner account. Cookies are sent to the backend for
+        each search and are never stored there.
+      </p>
+      <input type="file" id="cookies-file" accept=".txt,text/plain" />
+      <textarea
+        id="cookies"
+        rows="4"
+        spellcheck="false"
+        placeholder="Paste the contents of cookies.txt (Netscape format) here"
+      ></textarea>
+      <button type="button" id="clear-cookies">Clear cookies</button>
+    </details>
     <ul id="flashes" class="flashes" aria-live="polite"></ul>
     <div
       id="progress-bar"
