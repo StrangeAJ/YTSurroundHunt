@@ -26,11 +26,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Validate API base URL
+        if: vars.API_BASE_URL == ''
+        run: |
+          echo "::error::Repository variable API_BASE_URL is not set. Add it under Settings > Secrets and variables > Actions > Variables."
+          exit 1
+
       - name: Configure API base URL
         run: |
-          if [ -n "${{ vars.API_BASE_URL }}" ]; then
-            printf 'window.API_BASE_URL = "%s";\n' "${{ vars.API_BASE_URL }}" > frontend/config.js
-          fi
+          printf 'window.API_BASE_URL = "%s";\n' "${{ vars.API_BASE_URL }}" > frontend/config.js
 
       - uses: actions/configure-pages@v5
 

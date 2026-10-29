@@ -135,6 +135,14 @@ document.addEventListener("DOMContentLoaded", () => {
             event.preventDefault();
             document.getElementById("flashes").replaceChildren();
             document.getElementById("results").replaceChildren();
+
+            if (!API_BASE_URL && location.hostname.endsWith("github.io")) {
+                showMessage(
+                    "Backend URL is not configured. Set the API_BASE_URL repository variable.",
+                );
+                return;
+            }
+
             showProgressBar();
 
             try {
